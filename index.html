@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Grid Map Editor</title>
+
+<style>
+
+body{
+    font-family: sans-serif;
+}
+
+#toolbar{
+    margin-bottom:10px;
+}
+
+canvas{
+    border:1px solid black;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Grid Map Editor</h2>
+
+<div id="toolbar">
+    <button id="saveJson">Save JSON</button>
+    <button id="saveCsv">Save CSV</button>
+    <button id="loadJson">Load JSON</button>
+    
+    <input type="file" id="fileLoader" style="display:none">
+</div>
+
+<canvas id="map" width="800" height="600"></canvas>
+
+<script type="module" src="./js/main.js"></script>
+
+</body>
+</html>
