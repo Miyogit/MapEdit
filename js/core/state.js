@@ -9,6 +9,10 @@ export const state = {
     undoStack: [],
     redoStack: [],
 
-    currentMarkerType: "enemy"
+    currentMarkerType: "enemy",
+
+    zoom: 1,
+    offsetX: 0,
+    offsetY: 0
 
 };

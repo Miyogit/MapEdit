@@ -7,15 +7,59 @@ import { saveToServer } from "../io/serverSave.js";
 export function initMouse(canvas)
 {
 
+    // 右クリック or 中クリックでドラッグ
+    canvas.addEventListener("mousedown", (e) => {
+
+        if (e.button === 1 || e.button === 2) // 中 or 右
+        {
+            
+            console.log("DragOn");
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        }
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+
+        if (!isDragging) return;
+
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+
+        state.offsetX += dx;
+        state.offsetY += dy;
+
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        redraw();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isDragging = false;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+        isDragging = false;
+    });
+
+    // 右クリックメニュー禁止
+    canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
     canvas.addEventListener("click",(event)=>{
 
-        const rect = canvas.getBoundingClientRect();
+    const rect = canvas.getBoundingClientRect();
 
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
+    const screenX = event.clientX - rect.left;
+    const screenY = event.clientY - rect.top;
 
-        const gridX = Math.floor(mouseX / GRID_SIZE);
-        const gridY = Math.floor(mouseY / GRID_SIZE);
+    // 👇 ここが追加ポイント（ズーム＋パン対応）
+    const worldX = (screenX - state.offsetX) / state.zoom;
+    const worldY = (screenY - state.offsetY) / state.zoom;
+
+    const gridX = Math.floor(worldX / GRID_SIZE);
+    const gridY = Math.floor(worldY / GRID_SIZE);
 
         // 選択マス
         state.selectedCell = {x:gridX,y:gridY};
@@ -47,12 +91,16 @@ export function initMouse(canvas)
 
         const rect = canvas.getBoundingClientRect();
 
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
 
-        const gx = Math.floor(x/GRID_SIZE);
-        const gy = Math.floor(y/GRID_SIZE);
-;
+        // カメラ逆変換
+        const worldX = (screenX - state.offsetX) / state.zoom;
+        const worldY = (screenY - state.offsetY) / state.zoom;
+
+        const gx = Math.floor(worldX / GRID_SIZE);
+        const gy = Math.floor(worldY / GRID_SIZE);
+
 
         // マーカー削除
         const removed = state.markers.find(m => m.x===gx && m.y===gy);
@@ -96,6 +144,32 @@ export function initMouse(canvas)
             state.currentMarkerType="npc";
             console.log("mode: npc");
         }
+
+    });
+
+    // ズームインアウト
+    canvas.addEventListener("wheel", (e) => {
+
+        e.preventDefault();
+
+        const zoomSpeed = 0.1;
+
+
+        console.log("state.zoom_before:", state.zoom);
+        if (e.deltaY < 0)
+        {
+            state.zoom += zoomSpeed;
+        }
+        else
+        {
+            state.zoom -= zoomSpeed;
+        }
+        console.log("state.zoom_after:", state.zoom);
+
+        if (state.zoom < 0.2) state.zoom = 0.2;
+        if (state.zoom > 5) state.zoom = 5;
+
+        redraw();
 
     });
 }
